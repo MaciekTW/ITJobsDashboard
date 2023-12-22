@@ -16,8 +16,12 @@ def update_dashboard(start_date, end_date):
     dashboard = make_subplots(rows=3, cols=1, subplot_titles=('Total Job Offers Over Time', 'C++ Job Offers Over Time', 'Rust Job Offers Over Time'))
 
     for provider in dataLoader.DataLoader().getProvidersLabels():
-        data=dataLoader.DataLoader().getOffersCount(provider,[start_date,end_date])
-        dashboard.add_trace(go.Scatter(x=data["Data"], y=data["count"], mode='lines+markers', name='Total Job Offers - noFluffjobs'), row=1, col=1)
+        dataLoaderInstance = dataLoader.DataLoader()
+        combinerOffersCount=dataLoaderInstance.getOffersCount(provider,[start_date,end_date])
+        dashboard.add_trace(go.Scatter(x=combinerOffersCount["Data"], y=combinerOffersCount["count"], mode='lines+markers', name='Total Job Offers - noFluffjobs'), row=1, col=1)
+
+        specifiedTechnologyCount=dataLoaderInstance.getOffersCountPerCategory(provider,"AI",[start_date,end_date])
+        dashboard.add_trace(go.Scatter(x=specifiedTechnologyCount["Data"], y=specifiedTechnologyCount["count"], mode='lines+markers', name='Total Jobs Offers in backend category'), row=2, col=1)
 
 
     # if 'CJO' in selected_series:

@@ -57,16 +57,41 @@ class DataLoader:
     def getDatasets(self) -> dict:
         return self._datasets
 
-    def getOffersCount(self,dataProvider: str, dateRange:list) -> pd.DataFrame:
+    def getCount(self, data: dict, dateRange:list) -> pd.DataFrame:
         startDate =dateRange[0]
         stopDate= dateRange[1]
 
-        providerDatasets=self.getDatasets().get(dataProvider)
-
-        contsDict = {data: wartosc.shape[0] for data, wartosc in providerDatasets.items()
-                                  if startDate <= datetime.strptime(data, '%d-%m-%Y').date()  <= stopDate}
+        contsDict = {data: wartosc.shape[0] for data, wartosc in data.items()
+                     if startDate <= datetime.strptime(data, '%d-%m-%Y').date()  <= stopDate}
 
         df = pd.DataFrame(list(contsDict.items()), columns=['Data', 'count'])
         df['Data'] = pd.to_datetime(df['Data'], format='%d-%m-%Y')
         df = df.sort_values(by='Data')
+
         return df
+
+    def getOffersCount(self,dataProvider: str, dateRange:list) -> pd.DataFrame:
+        providerDatasets=self.getDatasets().get(dataProvider)
+
+        return  self.getCount(providerDatasets,dateRange)
+
+
+    def getOffersCountPerCategory(self,dataProvider: str, category: str, dateRange:list):
+        providerDatasets=self.getDatasets().get(dataProvider)
+
+
+        for data,wartosc in providerDatasets.items():
+            print(str(wartosc["Category"]))
+
+        filtered_providerDatasets = {}
+        for key, df in providerDatasets.items():
+            filtered_df = df[df['Category'].str.upper() == 'AI']
+
+            if not filtered_df.empty:
+                filtered_providerDatasets[key] = filtered_df
+
+        return self.getCount(filtered_providerDatasets,dateRange)
+
+
+    def getOffersCountPerRequirement(self,dataProvider: str, requirement: str):
+        pass
