@@ -1,3 +1,4 @@
+import numpy as np
 from Constans.constans import DATA_DIRECTORY
 import pandas as pd
 from pathlib import Path
@@ -57,12 +58,12 @@ class DataLoader:
     def getDatasets(self) -> dict:
         return self._datasets
 
-    def getCount(self, data: dict, dateRange:list) -> pd.DataFrame:
-        startDate =dateRange[0]
-        stopDate= dateRange[1]
+    def getCount(self, data_dict: dict, dateRange: list) -> pd.DataFrame:
+        startDate = dateRange[0]
+        stopDate = dateRange[1]
 
-        contsDict = {data: wartosc.shape[0] for data, wartosc in data.items()
-                     if startDate <= datetime.strptime(data, '%d-%m-%Y').date()  <= stopDate}
+        contsDict = {date_str: wartosc.shape[0] for date_str, wartosc in data_dict.items()
+                     if startDate <= datetime.strptime(date_str, '%d-%m-%Y').date() <= stopDate}
 
         df = pd.DataFrame(list(contsDict.items()), columns=['Data', 'count'])
         df['Data'] = pd.to_datetime(df['Data'], format='%d-%m-%Y')
@@ -80,9 +81,6 @@ class DataLoader:
         providerDatasets=self.getDatasets().get(dataProvider)
 
 
-        for data,wartosc in providerDatasets.items():
-            print(str(wartosc["Category"]))
-
         filtered_providerDatasets = {}
         for key, df in providerDatasets.items():
             filtered_df = df[df['Category'].str.upper() == 'AI']
@@ -95,3 +93,35 @@ class DataLoader:
 
     def getOffersCountPerRequirement(self,dataProvider: str, requirement: str):
         pass
+
+    def transform_dataframe(self, df, date_value):
+        new_df = df[df['UOP'].notna() & df['UOP'].str.contains('PLN')][['UOP', 'Level']]
+        new_df['Date'] = pd.to_datetime(date_value, format='%d-%m-%Y')
+
+        def process_uop(uop):
+            parts = uop.replace('  ', ' ').split()
+            if '-' in parts:
+                zero_index = float(parts[0]) if parts[0] != '-' else 0
+                second_index = float(parts[2]) if len(parts) > 2 and parts[2] != '-' else 0
+                return (zero_index + second_index) / 2
+            else:
+                return float(parts[0])
+
+        new_df['UOP'] = new_df['UOP'].apply(process_uop)
+
+        return new_df
+
+
+    def combine_dataframes(self, provider):
+        providerDatasets=self.getDatasets().get(provider)
+
+        transformed_dfs=[]
+
+        for key,df in providerDatasets.items():
+            transformed_dfs.append(self.transform_dataframe(df,key))
+
+        combined_df = pd.concat(transformed_dfs, ignore_index=True)
+        grouped_median = combined_df.groupby(['Date', 'Level']).median().reset_index()
+        grouped_median = grouped_median.sort_values(by='Date')
+
+        return grouped_median

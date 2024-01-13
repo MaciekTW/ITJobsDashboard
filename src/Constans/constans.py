@@ -1,2 +1,2 @@
 
-DATA_DIRECTORY="E:\Scrapinng\JobsDashboard\Data"
+DATA_DIRECTORY="C:\\Users\Maciek\Desktop\Temp\ITJobsDashboard\Data"
