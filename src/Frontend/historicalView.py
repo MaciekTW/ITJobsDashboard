@@ -8,7 +8,7 @@ historicalDiv = html.Div([
     dcc.DatePickerRange(
         id='date-picker-range',
         start_date=datetime.datetime(2023, 1, 1),
-        end_date=datetime.datetime(2023, 12, 31),
+        end_date=datetime.date.today(),
         display_format='DD-MM-YYYY'
     ),
     dcc.Graph(id='job-offers-dashboard'),

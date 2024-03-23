@@ -19,7 +19,6 @@ class DataLoader:
             cls._providersLabels = cls._computeProvidersLabels(cls._dataPath)
             cls._providersPaths = cls._computeProvidersPaths(cls._dataPath, cls._providersLabels)
             cls._datasets = cls._loadDataSets(cls._providersPaths)
-            print("Hello")
 
         return cls._instance
 
@@ -83,7 +82,7 @@ class DataLoader:
 
         filtered_providerDatasets = {}
         for key, df in providerDatasets.items():
-            filtered_df = df[df['Category'].str.upper() == 'AI']
+            filtered_df = df[df['Category'].str.upper() == category]
 
             if not filtered_df.empty:
                 filtered_providerDatasets[key] = filtered_df

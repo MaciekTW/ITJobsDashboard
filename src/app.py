@@ -4,6 +4,7 @@ from Frontend import mainView
 
 
 app = Dash(__name__, suppress_callback_exceptions=True)
+server = app.server
 app.layout = mainView.mainDiv
 
 if __name__ == '__main__':

@@ -1,2 +1,6 @@
+import os
 
-DATA_DIRECTORY="C:\\Users\Maciek\Desktop\Temp\ITJobsDashboard\Data"
+if os.getenv('IS_PROD_ENV'):
+    DATA_DIRECTORY = "/server/scrapping/data/"
+else:
+    DATA_DIRECTORY = "E:\\Scrapinng\\JobsDashboard\\Data"
