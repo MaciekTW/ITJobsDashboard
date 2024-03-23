@@ -90,8 +90,20 @@ class DataLoader:
         return self.getCount(filtered_providerDatasets,dateRange)
 
 
-    def getOffersCountPerRequirement(self,dataProvider: str, requirement: str):
-        pass
+    def getOffersCountPerRequirement(self,dataProvider: str, requirement: str, dateRange:list):
+        providerDatasets=self.getDatasets().get(dataProvider)
+
+
+        filtered_providerDatasets = {}
+        for key, df in providerDatasets.items():
+            x= df[df['Requirements'].apply(lambda x: requirement.upper() in list(str(x).strip().upper()[1:-1].split('" "')) if pd.notnull(x) else False)]
+            y= df[df['Optionals'].apply(lambda x: requirement.upper() in list(str(x).strip().upper()[1:-1].split('" "')) if pd.notnull(x) else False)]
+
+            if not x.empty and not y.empty:
+                temp=pd.concat([x,y],ignore_index=True)
+                filtered_providerDatasets[key] = temp
+
+        return self.getCount(filtered_providerDatasets,dateRange)
 
     def transform_dataframe(self, df, date_value):
         new_df = df[df['UOP'].notna() & df['UOP'].str.contains('PLN')][['UOP', 'Level']]

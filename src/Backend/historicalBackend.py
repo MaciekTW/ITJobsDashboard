@@ -26,13 +26,15 @@ def update_dashboard(start_date, end_date):
             go.Scatter(x=combinerOffersCount["Data"], y=combinerOffersCount["count"], mode='lines+markers',
                        name='Total Job Offers - noFluffjobs'), row=1, col=1)
 
-        specifiedTechnologyCount = dataLoaderInstance.getOffersCountPerCategory(provider, "AI", [start_date, end_date])
+        specifiedTechnologyCount = dataLoaderInstance.getOffersCountPerRequirement(provider, 'c++',[start_date, end_date])
+        print(len(specifiedTechnologyCount))
         dashboard.add_trace(
             go.Scatter(x=specifiedTechnologyCount["Data"], y=specifiedTechnologyCount["count"], mode='lines+markers',
                        name='Total Jobs Offers in backend category'), row=2, col=1)
 
 
     UOPSalaries=dataLoaderInstance.combine_dataframes(dataLoader.DataLoader().getProvidersLabels()[1])
+    dataLoaderInstance.getOffersCountPerRequirement(dataLoader.DataLoader().getProvidersLabels()[1], ''"c++"'',[start_date, end_date])
 
     for level in UOPSalaries['Level'].unique():
         # Filtracja danych dla danego poziomu
