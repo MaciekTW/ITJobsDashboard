@@ -4,6 +4,7 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 
+
 class DataLoader:
     _instance = None
     _file_content = None
@@ -31,9 +32,9 @@ class DataLoader:
         return {label: (dataPath.joinpath(label)) for label in providersLabels}
 
     @staticmethod
-    def _loadDataSets(providersPaths : dict) -> dict:
-
-        def loadDataSetsForProvider(providerPath : Path) -> dict:
+    def _loadDataSets(providersPaths: dict) -> dict:
+        print("DUPAAA")
+        def loadDataSetsForProvider(providerPath: Path) -> dict:
             dataframes = {}
             for file in providerPath.glob('*.csv'):
                 df = pd.read_csv(file)
@@ -43,7 +44,7 @@ class DataLoader:
             return dataframes
 
         dataPerProviders = {}
-        for label,path in providersPaths.items():
+        for label, path in providersPaths.items():
             dataPerProviders[label] = loadDataSetsForProvider(path)
 
         return dataPerProviders
@@ -70,15 +71,13 @@ class DataLoader:
 
         return df
 
-    def getOffersCount(self,dataProvider: str, dateRange:list) -> pd.DataFrame:
-        providerDatasets=self.getDatasets().get(dataProvider)
+    def getOffersCount(self, dataProvider: str, dateRange: list) -> pd.DataFrame:
+        providerDatasets = self.getDatasets().get(dataProvider)
 
-        return  self.getCount(providerDatasets,dateRange)
+        return self.getCount(providerDatasets, dateRange)
 
-
-    def getOffersCountPerCategory(self,dataProvider: str, category: str, dateRange:list):
-        providerDatasets=self.getDatasets().get(dataProvider)
-
+    def getOffersCountPerCategory(self, dataProvider: str, category: str, dateRange: list):
+        providerDatasets = self.getDatasets().get(dataProvider)
 
         filtered_providerDatasets = {}
         for key, df in providerDatasets.items():
@@ -87,23 +86,37 @@ class DataLoader:
             if not filtered_df.empty:
                 filtered_providerDatasets[key] = filtered_df
 
-        return self.getCount(filtered_providerDatasets,dateRange)
+        return self.getCount(filtered_providerDatasets, dateRange)
 
-
-    def getOffersCountPerRequirement(self,dataProvider: str, requirement: str, dateRange:list):
-        providerDatasets=self.getDatasets().get(dataProvider)
-
+    def getOffersCountPerRequirement(self, dataProvider: str, requirement: str, dateRange: list):
+        providerDatasets = self.getDatasets().get(dataProvider)
 
         filtered_providerDatasets = {}
         for key, df in providerDatasets.items():
-            x= df[df['Requirements'].apply(lambda x: requirement.upper() in list(str(x).strip().upper()[1:-1].split('" "')) if pd.notnull(x) else False)]
-            y= df[df['Optionals'].apply(lambda x: requirement.upper() in list(str(x).strip().upper()[1:-1].split('" "')) if pd.notnull(x) else False)]
+            x = df[df['Requirements'].apply(
+                lambda x: requirement.upper() in list(str(x).strip().upper()[1:-1].split('" "')) if pd.notnull(
+                    x) else False)]
+            y = df[df['Optionals'].apply(
+                lambda x: requirement.upper() in list(str(x).strip().upper()[1:-1].split('" "')) if pd.notnull(
+                    x) else False)]
 
             if not x.empty and not y.empty:
-                temp=pd.concat([x,y],ignore_index=True)
+                temp = pd.concat([x, y], ignore_index=True)
                 filtered_providerDatasets[key] = temp
 
-        return self.getCount(filtered_providerDatasets,dateRange)
+        return self.getCount(filtered_providerDatasets, dateRange)
+
+    def getOffersCountPerLevel(self, dataProvider: str,level: str, dateRange: list):
+        providerDatasets = self.getDatasets().get(dataProvider)
+
+        filtered_providerDatasets = {}
+        for key, df in providerDatasets.items():
+            filtered_df = df[df['Level'].str.lower() == level.lower()]
+
+            if not filtered_df.empty:
+                filtered_providerDatasets[key] = filtered_df
+
+        return self.getCount(filtered_providerDatasets, dateRange)
 
     def transform_dataframe(self, df, date_value):
         new_df = df[df['UOP'].notna() & df['UOP'].str.contains('PLN')][['UOP', 'Level']]
@@ -122,14 +135,13 @@ class DataLoader:
 
         return new_df
 
-
     def combine_dataframes(self, provider):
-        providerDatasets=self.getDatasets().get(provider)
+        providerDatasets = self.getDatasets().get(provider)
 
-        transformed_dfs=[]
+        transformed_dfs = []
 
-        for key,df in providerDatasets.items():
-            transformed_dfs.append(self.transform_dataframe(df,key))
+        for key, df in providerDatasets.items():
+            transformed_dfs.append(self.transform_dataframe(df, key))
 
         combined_df = pd.concat(transformed_dfs, ignore_index=True)
         grouped_median = combined_df.groupby(['Date', 'Level']).median().reset_index()
