@@ -13,13 +13,20 @@ historicalDiv = html.Div([
                 display_format='DD-MM-YYYY',
                 style={'padding': '4px', 'margin-left': '6px', 'border-radius': '10px'}
             ),
-            dcc.Dropdown(['JustJoinIT', 'NoFluffJobs'], ['JustJoinIT', 'NoFluffJobs'], multi=True, id='provider-pickup',
+            dcc.Dropdown(['justjoinit', 'noFluff'], ['justjoinit', 'noFluff'], multi=True, id='provider-pickup',
                          style={'padding': '4px', 'margin-left': '6px', 'border-radius': '10px'}),
         ], style={'display': 'flex', 'backgroundColor': '#312E37', 'padding': '12px', 'border-radius': '10px'}),
 
         html.Div([
-            dcc.Graph(id='job-offers-dashboard-1', style={'width': '50%', 'padding': '6px', 'margin': '10px'}),
-            dcc.Graph(id='job-offers-dashboard-2', style={'width': '50%', 'padding': '6px', 'margin': '10px'}),
+            dcc.Graph(id='job-offers-dashboard-1', style={'width': '33%', 'padding': '6px', 'margin': '10px'}),
+            dcc.Graph(id='job-offers-dashboard-2', style={'width': '33%', 'padding': '6px', 'margin': '10px'}),
+            html.Div([
+                dcc.Graph(id='job-offers-dashboard-5'),
+                dcc.Tabs(id="tabs-operation-modes", value='tab-1-example-graph', children=[
+                    dcc.Tab(label='noFluff', value='noFluff'),
+                    dcc.Tab(label='justjoinit', value='justjoinit'),
+                ])
+            ], style={'width': '33%', 'padding': '6px', 'margin': '10px'}),
         ], style={'display': 'flex'}),
         html.Div([
             dcc.Graph(id='job-offers-dashboard-3', style={'width': '50%', 'padding': '6px', 'margin': '10px'}),

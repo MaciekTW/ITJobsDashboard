@@ -9,12 +9,14 @@ from Backend import dataLoader
     [Output('job-offers-dashboard-1', 'figure'),
      Output('job-offers-dashboard-2', 'figure'),
      Output('job-offers-dashboard-3', 'figure'),
-     Output('job-offers-dashboard-4', 'figure')],
+     Output('job-offers-dashboard-4', 'figure'),
+     Output('job-offers-dashboard-5', 'figure')],
     [Input('date-picker-range', 'start_date'),
      Input('date-picker-range', 'end_date'),
-     Input('provider-pickup', 'value')]
+     Input('provider-pickup', 'value'),
+     Input('tabs-operation-modes', 'value')]
 )
-def update_dashboard(start_date, end_date, value):
+def update_dashboard(start_date, end_date, value,tab):
     start_date = datetime.datetime.fromisoformat(start_date).date()
     end_date = datetime.datetime.fromisoformat(end_date).date()
     dataLoaderInstance = dataLoader.DataLoader()
@@ -23,6 +25,7 @@ def update_dashboard(start_date, end_date, value):
     figures["fig2"] = figures.get("fig2", go.Figure())
     figures["fig3"] = figures.get("fig3", go.Figure())
     figures["fig4"] = figures.get("fig4", go.Figure())
+    figures["fig5"] = figures.get("fig5", go.Figure())
 
     for provider in value:
         combinerOffersCount = dataLoaderInstance.getOffersCount(provider, [start_date, end_date])
@@ -49,12 +52,34 @@ def update_dashboard(start_date, end_date, value):
         figures["fig3"].update_layout(title=f'Offers per seniority', xaxis_title='Date', yaxis_title='Count')
 
     UOPSalaries=dataLoaderInstance.combine_dataframes(dataLoader.DataLoader().getProvidersLabels()[1])
-    dataLoaderInstance.getOffersCountPerRequirement(dataLoader.DataLoader().getProvidersLabels()[1], ''"c++"'',[start_date, end_date])
 
     for level in UOPSalaries['Level'].unique():
         df_level = UOPSalaries[UOPSalaries['Level'] == level]
         figures["fig4"].add_trace(go.Scatter(x=df_level['Date'], y=df_level['UOP'], mode='lines', name=level))
 
-    figures["fig4"].update_layout(title="Median salary per seniority", xaxis_title='Date', yaxis_title='UOP',legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+    figures["fig4"].update_layout(title="Median salary per seniority (UOP)", xaxis_title='Date', yaxis_title='Count',legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
-    return figures["fig1"], figures["fig2"], figures["fig3"], figures["fig4"]
+    if tab == 'noFluff':
+        provider='noFluff'
+        modeCount = dataLoaderInstance.getOffersCountPerOperationMode2(provider,True,[start_date, end_date])
+        figures["fig5"].add_trace(
+            go.Scatter(x=modeCount["Data"], y=modeCount["count"], mode='lines+markers',
+                       name=f'Remote offers'))
+        modeCount = dataLoaderInstance.getOffersCountPerOperationMode2(provider,False,[start_date, end_date])
+        figures["fig5"].add_trace(
+            go.Scatter(x=modeCount["Data"], y=modeCount["count"], mode='lines+markers',
+                       name=f'Office offers'))
+    else:
+        provider='justjoinit'
+        for mode in ["remote","hybrid", "office"]:
+            modeCount = dataLoaderInstance.getOffersCountPerOperationMode(provider,mode,[start_date, end_date])
+            figures["fig5"].add_trace(
+                go.Scatter(x=modeCount["Data"], y=modeCount["count"], mode='lines+markers',
+                           name=f'{mode} offers'))
+
+
+    figures["fig5"].update_layout(title="WoW over time", xaxis_title='Date', yaxis_title='Count',legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+
+
+
+    return figures["fig1"], figures["fig2"], figures["fig3"], figures["fig4"], figures["fig5"]

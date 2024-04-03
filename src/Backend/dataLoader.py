@@ -118,6 +118,35 @@ class DataLoader:
 
         return self.getCount(filtered_providerDatasets, dateRange)
 
+
+    def getOffersCountPerOperationMode(self, dataProvider: str,mode: str, dateRange: list):
+        providerDatasets = self.getDatasets().get(dataProvider)
+        filtered_providerDatasets = {}
+
+        for key, df in providerDatasets.items():
+            filtered_df = df[df['OperationMode'].str.lower() == mode.lower()]
+
+            if not filtered_df.empty:
+                filtered_providerDatasets[key] = filtered_df
+
+        return self.getCount(filtered_providerDatasets, dateRange)
+
+
+    def getOffersCountPerOperationMode2(self, dataProvider: str,isRemote: bool, dateRange: list):
+        providerDatasets = self.getDatasets().get(dataProvider)
+        filtered_providerDatasets = {}
+
+        for key, df in providerDatasets.items():
+            if isRemote:
+                filtered_df = df[df['Location'].str.lower() == "remote"]
+            else:
+                filtered_df = df[df['Location'].str.lower() != "remote"]
+
+            if not filtered_df.empty:
+                filtered_providerDatasets[key] = filtered_df
+
+        return self.getCount(filtered_providerDatasets, dateRange)
+
     def transform_dataframe(self, df, date_value):
         new_df = df[df['UOP'].notna() & df['UOP'].str.contains('PLN')][['UOP', 'Level']]
         new_df['Date'] = pd.to_datetime(date_value, format='%d-%m-%Y')
