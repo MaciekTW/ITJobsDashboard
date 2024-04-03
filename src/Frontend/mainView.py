@@ -10,5 +10,5 @@ mainDiv =  html.Div(children=[
         ], style=styles.tabs_styles),
         html.Div(id='tabs-content-inline')
     ])
-])
+],style={'width':'100%'})
 

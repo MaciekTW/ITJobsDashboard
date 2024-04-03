@@ -1,16 +1,15 @@
 tabs_styles = {
-    'height': '44px'
+    'height': '44px',
+    'margin-top': '2px',
+    'margin-bottom': '8px'
 }
 tab_style = {
-    'borderBottom': '1px solid #d6d6d6',
-    'padding': '6px',
+    'padding': '8px',
     'fontWeight': 'bold'
 }
 
 tab_selected_style = {
-    'borderTop': '1px solid #d6d6d6',
-    'borderBottom': '1px solid #d6d6d6',
     'backgroundColor': '#119DFF',
     'color': 'white',
-    'padding': '6px'
+    'padding': '8px'
 }
