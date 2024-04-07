@@ -129,12 +129,20 @@ class DataLoader:
             if not filtered_df.empty:
                 filtered_providerDatasets[key] = filtered_df
 
-        return self.getCount(filtered_providerDatasets, dateRange)
+        total=[]
+        for key,value in self.getCount(providerDatasets, dateRange).values:
+            total.append(value)
+
+        df2 = self.getCount(filtered_providerDatasets, dateRange).assign(Total=total)
+        df2['Ratio'] = df2.apply(lambda row: round(row['count'] / row['Total'] * 100,2), axis=1)
+
+        return df2
 
 
     def getOffersCountPerOperationMode2(self, dataProvider: str,isRemote: bool, dateRange: list):
         providerDatasets = self.getDatasets().get(dataProvider)
         filtered_providerDatasets = {}
+
 
         for key, df in providerDatasets.items():
             if isRemote:
@@ -145,7 +153,15 @@ class DataLoader:
             if not filtered_df.empty:
                 filtered_providerDatasets[key] = filtered_df
 
-        return self.getCount(filtered_providerDatasets, dateRange)
+
+        total=[]
+        for key,value in self.getCount(providerDatasets, dateRange).values:
+            total.append(value)
+
+        df2 = self.getCount(filtered_providerDatasets, dateRange).assign(Total=total)
+        df2['Ratio'] = df2.apply(lambda row: round(row['count'] / row['Total'] * 100,2), axis=1)
+
+        return df2
 
     def transform_dataframe(self, df, date_value):
         new_df = df[df['UOP'].notna() & df['UOP'].str.contains('PLN')][['UOP', 'Level']]

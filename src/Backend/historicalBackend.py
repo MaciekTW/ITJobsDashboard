@@ -14,9 +14,10 @@ from Backend import dataLoader
     [Input('date-picker-range', 'start_date'),
      Input('date-picker-range', 'end_date'),
      Input('provider-pickup', 'value'),
-     Input('tabs-operation-modes', 'value')]
+     Input('tabs-operation-modes', 'value'),
+     Input("switch-wow", "checked")]
 )
-def update_dashboard(start_date, end_date, value,tab):
+def update_dashboard(start_date, end_date, value,tab,checked):
     start_date = datetime.datetime.fromisoformat(start_date).date()
     end_date = datetime.datetime.fromisoformat(end_date).date()
     dataLoaderInstance = dataLoader.DataLoader()
@@ -59,22 +60,38 @@ def update_dashboard(start_date, end_date, value,tab):
 
     figures["fig4"].update_layout(title="Median salary per seniority (UOP)", xaxis_title='Date', yaxis_title='Count',legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
 
+
     if tab == 'noFluff':
         provider='noFluff'
         modeCount = dataLoaderInstance.getOffersCountPerOperationMode2(provider,True,[start_date, end_date])
+        if checked:
+            y=modeCount["Ratio"]
+        else:
+            y=modeCount["count"]
+
         figures["fig5"].add_trace(
-            go.Scatter(x=modeCount["Data"], y=modeCount["count"], mode='lines+markers',
+            go.Scatter(x=modeCount["Data"], y=y, mode='lines+markers',
                        name=f'Remote offers'))
+
         modeCount = dataLoaderInstance.getOffersCountPerOperationMode2(provider,False,[start_date, end_date])
+        if checked:
+            y=modeCount["Ratio"]
+        else:
+            y=modeCount["count"]
         figures["fig5"].add_trace(
-            go.Scatter(x=modeCount["Data"], y=modeCount["count"], mode='lines+markers',
+            go.Scatter(x=modeCount["Data"], y=y, mode='lines+markers',
                        name=f'Office offers'))
     else:
         provider='justjoinit'
         for mode in ["remote","hybrid", "office"]:
             modeCount = dataLoaderInstance.getOffersCountPerOperationMode(provider,mode,[start_date, end_date])
+            if checked:
+                y=modeCount["Ratio"]
+            else:
+                y=modeCount["count"]
+
             figures["fig5"].add_trace(
-                go.Scatter(x=modeCount["Data"], y=modeCount["count"], mode='lines+markers',
+                go.Scatter(x=modeCount["Data"], y=y, mode='lines+markers',
                            name=f'{mode} offers'))
 
 
